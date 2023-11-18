@@ -29,7 +29,39 @@ RIGHT JOIN reviews_switchup rs ON rc.School_id = rs.school_id;
 
 SELECT *
 FROM review_aggregate
-ORDER BY total_reviews DESC;
+WHERE average_rating>4.5
+ORDER BY total_reviews DESC
+LIMIT 5;
 
 
+-- Let's explore locations
+SELECT *
+FROM locations_coursereport;
 
+SELECT *
+FROM locations_switchup;
+
+-- Remove the Online rows in locations_switchup
+
+SET SQL_SAFE_UPDATES = 0;
+
+DELETE FROM locations_switchup
+WHERE description = 'Online';
+
+-- Let's insert the switchup columns of interest in our locations_coursereport
+INSERT INTO locations_coursereport (`city.name`, school, school_id, `city.id`)
+SELECT `city.name`, school, school_id, `city.id`
+FROM locations_switchup;
+
+-- Let's avoid the duplicates
+CREATE TABLE locations_coursereport_no_duplicates AS
+SELECT DISTINCT `city.name`, school, school_id, `city.id`
+FROM locations_coursereport;
+
+SELECT COUNT(school_id),`city.name`
+FROM locations_coursereport
+GROUP BY `city.name`
+ORDER BY COUNT(school_id) DESC;
+
+SELECT *
+FROM review_aggregate;
